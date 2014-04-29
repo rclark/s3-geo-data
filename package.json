@@ -1,0 +1,19 @@
+{
+  "name": "aws-geo-data",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ryan Clark",
+  "license": "ISC",
+  "dependencies": {
+    "underscore": "^1.6.0",
+    "geojson-stream": "0.0.0",
+    "aws-sdk": "^2.0.0-rc.14",
+    "through2": "^0.4.1",
+    "rbush": "^1.3.2",
+    "superenv": "0.0.1"
+  }
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <meta charset='utf-8' />
+    <title>aws-geo-data</title>
+    <link href='//api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css' rel='stylesheet' />
+    <link rel='shortcut icon' href='path/to/favicon.ico' type='image/x-icon' />
+    <link href='//www.mapbox.com/base/latest/base.css' rel='stylesheet' />
+    <style>
+      html, body { height: 100%; width: 100%; }
+      body { position: relative; }
+      #map { 
+        position: absolute;
+        top: 0; bottom: 0;
+        left: 0; right: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src='//api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js'></script>
+    <script src='js/rbush.js'></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      var mbApp = {};
+      mbApp.map = L.mapbox.map('map', 'rclark.haln52mp', { tileLayer: { detectRetina: true } });
+
+      L.S3Index = L.GeoJSON.extend({
+        initialize: function(bucket, folder) {
+          this._layer = L.geoJson(null);
+          this._baseUrl = 'https://s3.amazonaws.com/' + bucket + '/';
+
+          d3.json(this._baseUrl + folder + '/spatial-index.json', L.bind(function(err, data) {
+            this._index = rbush(9).fromJSON(data);
+            this._initialized = true;
+            if (this._layer._map) this.getFeatures(this._layer._map.getBounds());
+          }, this));
+        },
+
+        getFeatures: function(bounds) {
+          if (!this._initialized) return;
+
+          var features = this._index.search(bounds.toBBoxString().split(','));
+          var geoJson = this._layer;
+          var base = this._baseUrl;
+          var urls = features.map(function(f) { return base + f.id });
+          
+          this._layer.clearLayers();
+
+          urls.forEach(function(url) {
+            d3.json(url, function(err, data) {
+              geoJson.addData(data);
+            });
+          });
+        },
+
+        onAdd: function(map) {
+          this._layer.addTo(map);
+          map.on('moveend', L.bind(function (e) {
+            this.getFeatures(map.getBounds());
+          }, this));
+        },
+
+        onRemove: function(map) {
+          map.removeLayer(this._layer);
+        }
+      });
+
+      L.s3Index = function(bucket, folder) { return new L.S3Index(bucket, folder); }
+
+      L.s3Index('aws-geo-data', 'data').addTo(mbApp.map);
+    </script>
+  </body>
+</html>
