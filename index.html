@@ -26,7 +26,7 @@
       var mbApp = {};
       mbApp.map = L.mapbox.map('map', 'rclark.haln52mp', { tileLayer: { detectRetina: true } });
 
-      L.S3Index = L.GeoJSON.extend({
+      L.S3Index = L.Class.extend({
         initialize: function(bucket, folder) {
           this._layer = L.geoJson(null);
           this._baseUrl = 'https://s3.amazonaws.com/' + bucket + '/';
@@ -62,8 +62,16 @@
           }, this));
         },
 
+        addTo: function(map) {
+          this.onAdd(map);
+        },
+
         onRemove: function(map) {
           map.removeLayer(this._layer);
+        },
+
+        removeFrom: function(map) {
+          this.onRemove(map);
         }
       });
 
