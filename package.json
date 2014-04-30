@@ -14,6 +14,7 @@
     "aws-sdk": "^2.0.0-rc.14",
     "through2": "^0.4.1",
     "rbush": "^1.3.2",
-    "superenv": "0.0.1"
+    "superenv": "0.0.1",
+    "async": "^0.8.0"
   }
 }

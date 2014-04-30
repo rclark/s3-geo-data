@@ -31,7 +31,7 @@
           this._layer = L.geoJson(null);
           this._baseUrl = 'https://s3.amazonaws.com/' + bucket + '/';
 
-          d3.json(this._baseUrl + folder + '/spatial-index.json', L.bind(function(err, data) {
+          d3.json(this._baseUrl + folder + '/lumped-spatial-index.json', L.bind(function(err, data) {
             this._index = rbush(9).fromJSON(data);
             this._initialized = true;
             if (this._layer._map) this.getFeatures(this._layer._map.getBounds());
