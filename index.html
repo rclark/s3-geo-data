@@ -34,14 +34,14 @@
           d3.json(this._baseUrl + folder + '/lumped-spatial-index.json', L.bind(function(err, data) {
             this._index = rbush(9).fromJSON(data);
             this._initialized = true;
-            if (this._layer._map) this.getFeatures(this._layer._map.getBounds());
+            if (this._layer._map) this.getFeatures({ target: this._layer._map });
           }, this));
         },
 
-        getFeatures: function(bounds) {
+        getFeatures: function(moveEvent) {
           if (!this._initialized) return;
 
-          var features = this._index.search(bounds.toBBoxString().split(','));
+          var features = this._index.search(moveEvent.target.getBounds().toBBoxString().split(','));
           var geoJson = this._layer;
           var base = this._baseUrl;
           var urls = features.map(function(f) { return base + f.id });
@@ -57,9 +57,7 @@
 
         onAdd: function(map) {
           this._layer.addTo(map);
-          map.on('moveend', L.bind(function (e) {
-            this.getFeatures(map.getBounds());
-          }, this));
+          map.on('moveend', this.getFeatures, this);
         },
 
         addTo: function(map) {
@@ -68,6 +66,7 @@
 
         onRemove: function(map) {
           map.removeLayer(this._layer);
+          map.off('moveend', this.getFeatures, this);
         },
 
         removeFrom: function(map) {
